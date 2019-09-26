@@ -30,6 +30,7 @@ joshuaplot(voiced_frame,fs,'voiced');
 %play(recObj);
 [y fs]= audioread('my_recording.wav');
 k = enframe(y,256,256);
+figure;
 plot(y);
 %%
  voiced = k(66,:);
