@@ -5,7 +5,7 @@ figure;
 plot(audio);
 title('audio time domain signal');
 STFT_window_length = 128;
-incre_dura = 4/1000;
+incre_dura = 4/1000;        
 figure;
 subplot 311
 assert(STFT_window_length>=incre_dura*16000, 'window length have to be greater than increment size');
@@ -29,13 +29,13 @@ title('no overlap small window')
 %%
 figure;
 STFT_window_length = 128;
-incre_dura = 8/1000;
+incre_dura = 8/1000;     %8 msec == 128 samples
 subplot 311
 assert(STFT_window_length>=incre_dura*16000, 'window length have to be greater than increment size');
 spectrogram(audio,fs,STFT_window_length,incre_dura);
 title('no overlap small window')
-STFT_window_length = 256;
-incre_dura = 16/1000;
+STFT_window_length = 256;  
+incre_dura = 16/1000;       %16 msec == 256 samples
 subplot 312
 
 assert(STFT_window_length>=incre_dura*16000, 'window length have to be greater than increment size');
@@ -43,7 +43,7 @@ spectrogram(audio,fs,STFT_window_length,incre_dura);
 title('no overlap media window')
 subplot 313
 STFT_window_length = 512;
-incre_dura = 32/1000;
+incre_dura = 32/1000;       %32 msec == 512 samples
 assert(STFT_window_length>=incre_dura*16000, 'window length have to be greater than increment size');
 spectrogram(audio,fs,STFT_window_length,incre_dura);
 title('np overlap large window')
