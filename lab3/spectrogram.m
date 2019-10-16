@@ -1,5 +1,5 @@
-function spectrogram(x,fs,window_length,incre_dura)
-    STFT_Matrix = STFT(x,fs,window_length,incre_dura);
+function spectrogram(x,fs,window_length,incre_dura,win)
+    STFT_Matrix = STFT(x,fs,window_length,incre_dura,win);
     mag = log(abs(STFT_Matrix));
     positive = mag(:,1:window_length/2);
     %maximum = max(positive,[],'all');

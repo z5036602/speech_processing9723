@@ -1,3 +1,4 @@
+%%this function plot phase and magnitude response of signal
 function joshuaplot(x,fs,B)
     freq_spec_unvoiced = abs(fftshift(fft(x)));
     f = linspace(-fs/2,fs/2,length(x));
