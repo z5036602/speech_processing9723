@@ -23,7 +23,7 @@ function LPC_spectrogram(x,fs,win_length,incre_dura,win)
     %positive = mag(:,1:window_length/2);
     %maximum = max(positive,[],'all');
     %clims = [0 30];
-    x = [0 floor(length(x)/fs)];
+    x = [0 length(x)/fs];
     y = [0 8000];
     data_matrix_flipping =  flip(mag,1);
     imagesc(x,y,mag');

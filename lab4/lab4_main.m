@@ -1,6 +1,6 @@
 %%% This script plots the formant contour and LPC spectrogram
 clear;clc
-[audio,fs]= audioread('sample3.wav'); % fs -->16k
+[audio,fs]= audioread('sample4.wav'); % fs -->16k
 audio = audio-mean(audio);
 soundsc(audio,fs); %fs = 22k
 duration = length(audio)/fs;

@@ -20,6 +20,6 @@ function output = STFT(x,fs,length,incre_dura,win)
     output = zeros(size(window_matrix,1),2^pow);
    
     for k = 1:size(window_matrix,1)
-        output(k,:) = fft(window_matrix(k,:));
+        output(k,:) = FFT(window_matrix(k,:));
     end 
 end 
