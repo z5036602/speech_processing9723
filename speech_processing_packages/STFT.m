@@ -1,4 +1,4 @@
-function output = STFT(x,fs,length,incre_dura,win)
+function output = filter_frame_by_frame_using_bankfilter(x,fs,length,incre_dura,win)
     incre = incre_dura;
     window_matrix = enframe(x,length,incre);
     switch win

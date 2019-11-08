@@ -1,0 +1,34 @@
+function output = filter_frame_by_frame_using_bankfilter(filter_bank,x,length,incre_dura,win,initial_condition)
+    incre = incre_dura;
+    window_matrix = enframe(x,length,incre);
+    switch win
+        case 'hamming'
+            my_window = hamming(length);
+        case 'hanning'
+            my_window = hann(length);
+        case 'balckman'
+            my_window = blackman(length);
+        otherwise
+            my_window = rectwin(length);
+    end
+    
+    for k = 1:size(window_matrix,1)
+        window_matrix(k,:) = window_matrix(k,:).*transpose(my_window);
+    end
+    if initial_condition == true
+        f = @filter_signal_by_filter_banks_ic;
+    else 
+        f = @filter_signal_by_filter_banks;
+    end 
+    one_frame_of_signal=zeros(size(filter_bank,1),size(x,2));
+    output = zeros(size(window_matrix));
+    
+    for k = 1:size(window_matrix,1)
+       for i = 1:size(filter_bank,1)
+            one_frame_of_signal (i,:) = filter(filter_bank(i,:),1,x);
+        
+       end 
+        = 
+       output(k,:) = sum(signal,1);
+    end 
+end 

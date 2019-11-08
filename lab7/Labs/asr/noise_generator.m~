@@ -1,0 +1,5 @@
+function output = noise_generator(signal,snr)
+    %utput=10*log10(mean((signal).^2)/mean(noise.^2));
+    output = mean((signal).^2)/(10^(snr/10));
+
+end 
