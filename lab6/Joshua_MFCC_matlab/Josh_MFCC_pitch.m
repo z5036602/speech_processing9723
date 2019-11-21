@@ -30,12 +30,12 @@ DCT_onlecture = zeros(size(mel_MA));
 for k=1:size(mel_MA,1)
     DCT_onlecture(k,:) = DCT_II(mel_MA(k,:));
 end
-
+%%%% creating delta, concatenate the delta with oridingal mfcc
 if delta == true
    delta_output = Deltas(DCT_onlecture(:,1:13));
    output = [DCT_onlecture(:,1:13),delta_output(:,1:5)]; 
 else 
-%%%just a really neat implementation of DCT, ran through on paper
+%%%just a really neat implementation of DCT
 % CC = mel_MA';
 % dctm = @( N, K )( sqrt(2/N) * cos( repmat([0:N-1].',1,K).* repmat(pi*([0:K-1]+0.5)/K,N,1) ) );
 % DCT = dctm(17,bank_number);
@@ -46,10 +46,11 @@ else
 
 %output = CC;    %%%withDCT
 
-output = DCT_onlecture(:,1:13);    %%%according to DCT on lecture notes
+output = DCT_onlecture(:,1:13);    %%%according to DCT on lecture notes (with DCT)
 
 
-%%question 4
+%%question 4 check out get rid of some coefficients, the perform the
+%%inverse DCT, remeber to set break point
 % mel_MA_from_inverse_DCT = zeros(size(mel_MA));
 % DCT_onlecture(:,3:end) = 0;
 % for k=1:size(mel_MA,1)

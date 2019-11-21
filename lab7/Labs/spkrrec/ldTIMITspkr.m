@@ -54,27 +54,13 @@ for mainDirNum = 3:3, %size(D1,1), % DR1 only
 
                 % Other feature vectors
                 for n = start(2):frame:finish(end-1)-frame, % leave off initial and trailing silence
-                    %xn = yn2(n:n+frame-1);
-
-                    % Feature extraction
-                    %a = lpc(xn,10); % LP as placeholder
-                    %lsf = poly2lsf(a); % LSF as placeholder
-
-                    % Append feature vector to phone matrix
-                    %spkrvectors{spkrs}(spkridx(spkrs),:) = lsf; %a(2:11);
-                    %spkridx(spkrs) = spkridx(spkrs) + 1;
-
-                    % fwrite(fidh,H,'float'); % saving output
+                  
                     if frames>=framelimit,
                         disp(['Reached ' num2str(framelimit) ' frames'])
                         pause;
                     end
                     frames = frames + 1;
-                    % for sanity checking
-                    %subplot(3,1,1), plot(xn);
-                    %subplot(3,1,2), plot(20*log10(1./abs(polyval(a,exp(j*(0:100)/100*pi)))));
-                    %subplot(3,1,3), plot([Hn H]);
-                    %pause;
+                    
                 end
             end
             files = files + 1;
@@ -90,10 +76,8 @@ for mainDirNum = 3:3, %size(D1,1), % DR1 only
     end
 end
 disp('Ended');
-%%
-%spkr10mod = emgmm(spkrvectors{1}{2},32,10) ;  % this speaker has a bug
-%[~,llh] = latent_pospdf(spkrvectors{10}{10},spkr10mod);
-%%
+%% Q1
+%Mixtures test, log-liklihood with different number of GMM mixtures
 load('mystery.mat');
 llh_record = [];
 counter = 1;
@@ -106,34 +90,31 @@ for m = 1:7
     llh_record(counter) =llh;
     counter = counter + 1;
 end 
-%%
 plot(mixutures,llh_record);
 
-%%
+%% Q2
+%Train a model using 5 utterances from one speaker, 32 mixtures 
+%it tests with different number of iteration
 five_utterances = [];
-for speaker = 10:10
+for speaker = 4:4
     for utterance = 1:5
         five_utterances = [five_utterances;spkrvectors{speaker}{utterance}]
     end 
 end   
 
-
-%%
 llh_record = []
 
 for iteration = 1:10
          spkr10mod = emgmm(five_utterances,32,iteration) ;
          [~,llh] = latent_pospdf(five_utterances,spkr10mod);
-         llh_record = [llh_record;llh];
-        
-         
-         
+         llh_record = [llh_record;llh];         
 end 
  
 plot (llh_record);
     
 %% Q3
-%spkr10mod = emgmm(five_utterances,8,iteration) ;
+% Train a model using 5 utterances from one speaker, 8 mixtures and 
+% iterations of the EM algorithm, then we test with 16,32,64,128
 llh_record = [];  %%mixture increase, one guassian will overfit a point and have low likelihood
 mixutures_number = [];
 counter = 1;
@@ -147,12 +128,22 @@ for m = 1:7
 end 
 plot(mixutures_number,llh_record);
 
-%%
+%% Q4
+%train a model using same utt, and test with different utt and same utt
 spkr10mod = emgmm(spkrvectors{10}{1},32,10) ;  
 [~,llh_same] = latent_pospdf(spkrvectors{10}{1},spkr10mod);
 [~,llh_diff] = latent_pospdf(spkrvectors{10}{2},spkr10mod);
-%%
-%disp('same utt:' + llh_same);
+disp('llh_same vs. llh_diff' )
+disp( llh_same);
+disp( llh_diff);
+%% Q5 five utterance is from speaker 10, liklihood of all utterances, you will found out
+% that the liklihood of data that trained on are higher than others 
+five_utterances = [];
+for speaker = 1:1
+    for utterance = 1:5
+        five_utterances = [five_utterances;spkrvectors{speaker}{utterance}]
+    end 
+end   
 spkr10mod = emgmm(five_utterances,128,10);
 llh_record = zeros(100,1);
 counter = 1;
@@ -166,8 +157,11 @@ for speaker = 1:10
 end 
 plot (llh_record);
 
-%%
-%spkr10mod = emgmm(spkrvectors{10}{1},16,10) ;  
+%% Q6Train a model using the first utterance from one speaker, 64 mixtures and 10
+%utterance for that same speaker. Repeat, training on the first 2 utterances, the
+%first 3 utterances , . . . , the first 9 utterances. Plot the log-likelihood against the
+%number of utterances used to train the model
+% it is reducing number of utterances to see the likelihood changes
 utterances = [];
 llh_record = [];
 speaker = 1;
@@ -180,6 +174,75 @@ for utter_ending_point = 1:9
     llh_record = [llh_record;llh];
 
 end 
-%%
+
 plot(llh_record);
 %%
+%create 10 speaker GMM from 7 utterances from each it creates 10 GMM
+speaker_models.models = cell(10,1);
+for speakers = 1:10
+    speaker_utterances = [];
+    for utterance = 1:7
+        speaker_utterances = [speaker_utterances;spkrvectors{speakers}{utterance}];
+        
+    end 
+    speaker_models.models{speakers} = emgmm(speaker_utterances,32,10);
+end 
+%%
+llh_record = [];
+ground_truth = [];
+for speakers = 1:10
+    for utterance = 8:10
+        for model_counter = 1:10
+            [~,llh] = latent_pospdf(spkrvectors{speakers}{utterance},speaker_models.models{model_counter});
+            disp(llh);
+            llh_record = [llh_record;llh];
+            if model_counter == speakers
+                ground_truth = [ground_truth,true];
+                
+            else 
+                ground_truth = [ground_truth,false];
+            end 
+        end 
+        
+    end 
+   
+end 
+%%
+threshold_trail = sort(llh_record);
+predication = zeros(size(ground_truth));
+error_rate = zeros(size(ground_truth));
+false_acceptance_rate=zeros(size(ground_truth));
+false_rejection_rate=zeros(size(ground_truth));
+
+for q = 1:length(llh_record)
+    predication = zeros(size(ground_truth));
+    accept_index = find(llh_record>=threshold_trail(q));
+    reject_index = find(llh_record<threshold_trail(q));
+    predication(accept_index) = true;
+    
+    false_acceptance_rate(q) = sum(abs(predication(accept_index)-ground_truth(accept_index)))/length(accept_index);
+    if length(reject_index) ~= 0
+        false_rejection_rate(q) = sum(abs(predication(reject_index)-ground_truth(reject_index)))/length(reject_index);
+    else 
+        false_rejection_rate(q) = 0.001;
+    end 
+    disp(false_rejection_rate(q));
+    if  false_rejection_rate(q) <= false_acceptance_rate(q)+1/300 || false_rejection_rate(q) >= false_acceptance_rate(q)-1/300
+        equal_error_threshold = threshold_trail(q);
+    
+    end 
+    number_of_misclassification = sum(abs(predication - ground_truth));
+    error_rate(q) = (number_of_misclassification/length(llh_record))*100;
+end 
+
+threshold_from_acc = threshold_trail(error_rate == min(error_rate));
+%%
+figure;
+plot (error_rate);
+title('error rate');
+figure;
+plot(false_acceptance_rate,false_rejection_rate)
+title('DET');
+xlabel('false accpet')
+xlim([0 1])
+ylabel('false reject')
